@@ -1,0 +1,38 @@
+#!/bin/bash
+thomasv_pubkey="0x6694D8DE7BE8EE5631BED9502BD5824B7F9470E6"
+
+if [ -z "$1" ]
+then
+	echo "Usage $0 [version]"
+	exit 1
+fi
+
+version="$1"
+mkdir installation-logs
+cd installation-logs
+mkdir $version
+cd $version
+
+filename="Electrum-$version.tar.gz"
+wget https://download.electrum.org/$version/$filename https://download.electrum.org/$version/$filename.asc 
+
+gpg --list-keys $thomasv_pubkey || gpg --recv-keys $thomasv_pubkey
+gpg --verify $filename.asc $filename
+
+if [ $? -eq 0 ]
+then
+	response="n"
+	read -p "GPG sig checks out. Proceed with installation (N,y): " response
+	if [ "$response" == "y" ]
+	then
+		echo "Proceeding with install"
+		pip2 install --log=installation.log -vvv $filename
+	else
+		echo "Not proceeding with install"
+	fi
+else 
+	echo "GPG sig check failed!"
+fi
+
+echo "Cleaning up..."
+rm $filename $filename.asc
