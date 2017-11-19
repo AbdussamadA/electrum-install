@@ -26,7 +26,7 @@ then
 	if [ "$response" == "y" ]
 	then
 		echo "Proceeding with install"
-		pip2 install --log=installation.log -vvv $filename
+		pip3 install --log=installation.log -vvv $filename
 	else
 		echo "Not proceeding with install"
 	fi
