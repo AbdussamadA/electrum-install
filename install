@@ -25,7 +25,7 @@ function install_dependencies () {
 			not_implemented
 			;;
 		debian|*buntu)
-			if [[ "$OS" =~ "*buntu" ]]
+			if [[ $OS =~ buntu$ ]]
 			then
 				add-apt-repository universe
 			fi
