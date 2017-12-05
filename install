@@ -1,4 +1,39 @@
 #!/bin/bash
+function identify_os () {
+	local name="unknown"
+	if [ -f /etc/os-release ]
+	then
+		source /etc/os-release
+		name="$ID"
+	elif [ -f /etc/lsb-release ]
+	then
+		source /etc/lsb-release
+		name=`echo $DISTRIB_ID | tr '[:upper]' '[:lower]'`
+	fi
+	echo $name;
+}
+
+function not_implemented () {
+	echo "NOTE: Dependency installation for this OS has not been implemented yet"
+}
+
+function install_dependencies () {
+	echo "Checking if dependencies are installed and installing as necessary..."
+	OS=`identify_os`
+	case "$OS" in
+		opensuse|suse)
+			not_implemented
+			;;
+		debian|*buntu)
+			apt-get update 
+			apt-get install -qy  python3-setuptools python3-pyqt5 python3-pip dirmngr
+			;;
+		*)
+			echo "Unknown OS. Can't install dependencies";
+			;;
+	esac
+}
+
 thomasv_pubkey="0x6694D8DE7BE8EE5631BED9502BD5824B7F9470E6"
 
 if [ -z "$1" ]
@@ -6,6 +41,8 @@ then
 	echo "Usage $0 [version]"
 	exit 1
 fi
+
+install_dependencies
 
 version="$1"
 mkdir installation-logs
