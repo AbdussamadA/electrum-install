@@ -24,13 +24,13 @@ function install_dependencies () {
 		opensuse|suse)
 			not_implemented
 			;;
-		debian|*buntu)
+		debian|*buntu|raspbian)
 			if [[ $OS =~ buntu$ ]]
 			then
 				add-apt-repository universe
 			fi
-			apt-get update 
-			apt-get install -qy  python3-setuptools python3-pyqt5 python3-pip dirmngr
+			apt-get update -qq 
+			apt-get install -qq  python3-setuptools python3-pyqt5 python3-pip dirmngr
 			;;
 		*)
 			echo "Unknown OS. Can't install dependencies";
