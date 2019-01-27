@@ -19,6 +19,7 @@ function not_implemented () {
 
 function install_dependencies () {
 	echo "Checking if dependencies are installed and installing as necessary..."
+	echo "You may be prompted for the root password"
 	OS=`identify_os`
 	case "$OS" in
 		opensuse|suse)
@@ -27,10 +28,12 @@ function install_dependencies () {
 		debian|*buntu|raspbian)
 			if [[ $OS =~ buntu$ ]]
 			then
-				add-apt-repository universe
+				echo "Adding apt repository universe"
+				sudo add-apt-repository universe
 			fi
-			apt-get update -qq 
-			apt-get install -qq  python3-setuptools python3-pyqt5 python3-pip dirmngr
+			echo "Updating and installing dependencies"
+			sudo apt-get update -qq 
+			sudo apt-get install -qq  python3-setuptools python3-pyqt5 python3-pip dirmngr
 			;;
 		*)
 			echo "Unknown OS. Can't install dependencies";
@@ -48,14 +51,22 @@ fi
 
 install_dependencies
 
+curdir=`pwd`
 version="$1"
-mkdir installation-logs
-cd installation-logs
-mkdir $version
-cd $version
+tempdir="/tmp/electrum-install/$version"
+mkdir -p $tempdir
+cd $tempdir
 
 filename="Electrum-$version.tar.gz"
-wget https://download.electrum.org/$version/$filename https://download.electrum.org/$version/$filename.asc 
+if [ ! -f "$filename" ]
+then 
+	wget https://download.electrum.org/$version/$filename 
+fi
+
+if [ ! -f "$filename.asc" ]
+then
+	wget https://download.electrum.org/$version/$filename.asc 
+fi
 
 gpg --list-keys $thomasv_pubkey || gpg --keyserver pgp.mit.edu --recv-keys $thomasv_pubkey
 gpg --verify $filename.asc $filename
@@ -67,7 +78,18 @@ then
 	if [ "$response" == "y" ]
 	then
 		echo "Proceeding with install"
-		pip3 install --log=installation.log -vvv $filename
+		
+		#untarring the tarball
+		electrum_dir="$HOME/electrum"
+		if [ -d "$electrum_dir" ]
+		then
+			rm -rf "$electrum_dir"
+		fi
+		echo "Extracting electrum files into $electrum_dir"
+		mkdir -p $electrum_dir
+		tar --strip-components=1 -C "$electrum_dir" -xzf $filename
+				
+		echo "To run electrum just type $electrum_dir/run_electrum from any terminal app. You can also create a shortcut to $electrum_dir/run_electrum on your desktop"
 	else
 		echo "Not proceeding with install"
 	fi
@@ -77,3 +99,4 @@ fi
 
 echo "Cleaning up..."
 rm $filename $filename.asc
+cd $curdir
