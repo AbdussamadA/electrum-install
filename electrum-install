@@ -1,45 +1,4 @@
 #!/bin/bash
-function identify_os () {
-	local name="unknown"
-	if [ -f /etc/os-release ]
-	then
-		source /etc/os-release
-		name="$ID"
-	elif [ -f /etc/lsb-release ]
-	then
-		source /etc/lsb-release
-		name=`echo $DISTRIB_ID | tr '[:upper]' '[:lower]'`
-	fi
-	echo $name;
-}
-
-function not_implemented () {
-	echo "NOTE: Dependency installation for this OS has not been implemented yet"
-}
-
-function install_dependencies () {
-	echo "Checking if dependencies are installed and installing as necessary..."
-	echo "You may be prompted for the root password"
-	OS=`identify_os`
-	case "$OS" in
-		opensuse|suse)
-			not_implemented
-			;;
-		debian|*buntu|raspbian)
-			if [[ $OS =~ buntu$ ]]
-			then
-				echo "Adding apt repository universe"
-				sudo add-apt-repository universe
-			fi
-			echo "Updating and installing dependencies"
-			sudo apt-get update -qq 
-			sudo apt-get install -qq  python3-setuptools python3-pyqt5 python3-pip dirmngr
-			;;
-		*)
-			echo "Unknown OS. Can't install dependencies";
-			;;
-	esac
-}
 
 thomasv_pubkey="0x6694D8DE7BE8EE5631BED9502BD5824B7F9470E6"
 
@@ -49,15 +8,13 @@ then
 	exit 1
 fi
 
-install_dependencies
-
 curdir=`pwd`
 version="$1"
 tempdir="/tmp/electrum-install/$version"
 mkdir -p $tempdir
 cd $tempdir
 
-filename="Electrum-$version.tar.gz"
+filename="electrum-$version-x86_64.AppImage"
 if [ ! -f "$filename" ]
 then 
 	wget https://download.electrum.org/$version/$filename 
@@ -78,18 +35,18 @@ then
 	if [ "$response" == "y" ]
 	then
 		echo "Proceeding with install"
-		
-		#untarring the tarball
-		electrum_dir="$HOME/electrum"
-		if [ -d "$electrum_dir" ]
-		then
-			rm -rf "$electrum_dir"
-		fi
-		echo "Extracting electrum files into $electrum_dir"
+
+		electrum_dir="$HOME/bin"
+		electrum_bin="$electrum_dir/electrum"
 		mkdir -p $electrum_dir
-		tar --strip-components=1 -C "$electrum_dir" -xzf $filename
-				
-		echo "To run electrum just type $electrum_dir/run_electrum from any terminal app. You can also create a shortcut to $electrum_dir/run_electrum on your desktop"
+		if [ -f "$electrum_bin" ]
+		then
+			rm $electrum_bin
+		fi
+		cp $filename $electrum_bin
+		chmod +x $electrum_bin
+		
+		echo "To run electrum just type $electrum_bin from any terminal app. You can also create a shortcut to $electrum_bin on your desktop"
 	else
 		echo "Not proceeding with install"
 	fi
