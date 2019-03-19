@@ -25,7 +25,7 @@ then
 	wget https://download.electrum.org/$version/$filename.asc 
 fi
 
-gpg --list-keys $thomasv_pubkey || gpg --keyserver pgp.mit.edu --recv-keys $thomasv_pubkey
+gpg --list-keys $thomasv_pubkey || gpg --recv-keys $thomasv_pubkey || wget https://github.com/spesmilo/electrum/raw/3.3.4/pubkeys/ThomasV.asc -O - | gpg --import  
 gpg --verify $filename.asc $filename
 
 if [ $? -eq 0 ]
