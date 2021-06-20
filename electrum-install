@@ -15,18 +15,19 @@ mkdir -p $tempdir
 cd $tempdir
 
 filename="electrum-$version-x86_64.AppImage"
+gpgsigfilename="$filename.ThomasV.asc"
 if [ ! -f "$filename" ]
 then 
 	wget https://download.electrum.org/$version/$filename 
 fi
 
-if [ ! -f "$filename.asc" ]
+if [ ! -f "$gpgsigfilename" ]
 then
-	wget https://download.electrum.org/$version/$filename.asc 
+	wget https://download.electrum.org/$version/$gpgsigfilename 
 fi
 
 gpg --list-keys $thomasv_pubkey || gpg --recv-keys $thomasv_pubkey || wget https://github.com/spesmilo/electrum/raw/3.3.4/pubkeys/ThomasV.asc -O - | gpg --import  
-gpg --verify $filename.asc $filename
+gpg --verify $gpgsigfilename $filename
 
 if [ $? -eq 0 ]
 then
@@ -55,5 +56,5 @@ else
 fi
 
 echo "Cleaning up..."
-rm $filename $filename.asc
+rm $filename $gpgsigfilename
 cd $curdir
