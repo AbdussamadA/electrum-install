@@ -4,12 +4,13 @@ thomasv_pubkey="0x6694D8DE7BE8EE5631BED9502BD5824B7F9470E6"
 
 if [ -z "$1" ]
 then
-	echo "Usage $0 [version]"
-	exit 1
+	version=$(wget -qO - https://electrum.org/version|cut -d \" -f4)
+	echo "Fetching latest version $version"
+else
+	version="$1"
 fi
 
 curdir=`pwd`
-version="$1"
 tempdir="/tmp/electrum-install/$version"
 mkdir -p $tempdir
 cd $tempdir
